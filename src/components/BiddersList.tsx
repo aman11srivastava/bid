@@ -3,14 +3,12 @@ import axios from "axios";
 import {
     CircularProgress,
     makeStyles,
-    Paper,
     Table, TableBody, TableCell,
     TableContainer,
     TableHead, TablePagination, TableRow,
     Theme, Typography,
     useTheme
 } from "@material-ui/core";
-import {columns} from "../utils/constants";
 import {ArrowDownward, ArrowUpward} from "@material-ui/icons";
 import {useHistory} from 'react-router-dom'
 
@@ -87,91 +85,63 @@ export const BiddersList = () => {
         setBiddersList(n);
     };
 
-    const bidingOriginal = () => {
-        setSort(false);
-        setBid(!bid);
-    };
+    const AVATAR_STYLE = {
+        height: 40,
+        width: 40,
+        marginRight: 20,
+        marginTop: 10
+    }
 
     return (
         <>
-            {loading ? <CircularProgress color={"secondary"}/> : (
+            {loading ? <CircularProgress style={{margin: 30}} color={"secondary"}/> : (
                 <>
-                    <Paper className={classes.root}>
+                    <div className={classes.root} style={{margin: 30}}>
                         <TableContainer>
-                            <Table>
+                            <Table style={{cursor: 'pointer'}}>
                                 <TableHead>
                                     <TableRow>
-                                        {columns.map((column) => (
-                                            <TableCell
-                                                key={column.id}
-                                                style={{minWidth: column.minWidth}}
-                                            >
-                                                {column.label}
-                                                {column.id === "Bid" && (
-                                                    <>
-                                                        <span onClick={ascendingOrder}>
-                                                            {" "}
-                                                            <ArrowUpward/>
-                                                        </span>
-                                                        <span onClick={descendingOrder}>
-                                                            <ArrowDownward/>
-                                                        </span>
-                                                    </>
-                                                )}
-                                            </TableCell>
-                                        ))}
+                                        <TableCell><Typography variant={"h5"}>Name</Typography></TableCell>
+                                        <TableCell><Typography variant={"h5"}>Email</Typography></TableCell>
+                                        <TableCell><Typography variant={"h5"}>Phone</Typography></TableCell>
+                                        <TableCell><Typography variant={"h5"}>Has Premium</Typography></TableCell>
+                                        <TableCell style={{display: 'flex'}}>
+                                            <Typography variant={"h5"}>Bid (Max/Min)</Typography>
+                                            <ArrowUpward onClick={ascendingOrder}/>
+                                            <Typography variant={"h5"}>/</Typography>
+                                            <ArrowDownward onClick={descendingOrder}/>
+                                        </TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
                                     {
                                         biddersList.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row: any) => {
                                         return (
-                                            <TableRow hover role="checkbox" tabIndex={-1} key={row.code}>
-                                                {columns.map((column) => {
-                                                    const value = row[column.id];
-                                                    return (
-                                                        <TableRow onClick={() =>
-                                                            history.push({
-                                                                pathname: `/${row.id}`,
-                                                                state: { bidder: row },
-                                                            })}>
-                                                            <TableCell className="name-img-section">
-                                                                <img
-                                                                    height={90}
-                                                                    width={90}
-                                                                    src={row.avatarUrl}
-                                                                    alt=""
-                                                                />
-                                                                <h4>{row.firstname + " " + row.lastname}</h4>
-                                                            </TableCell>
-                                                            <TableCell>{row.email}</TableCell>
-                                                            <TableCell>{row.phone}</TableCell>
-                                                            <TableCell>
-                                                                {row.hasPremium ? "Yes" : "No"}
-                                                            </TableCell>
-                                                            <TableCell className="bid-sec" align={"right"}>
-                                                                <p className={!bid ? "" : "low-price"}>
-                                                                    {sort ? (row.bids[0] || {}).amount : row.bids.length > 0 ? !bid ? Math.max.apply(
-                                                                        Math, row.bids.map(function (o: any) {
-                                                                            return o.amount;
-                                                                        })
-                                                                        )
-                                                                        : Math.min.apply(
-                                                                            Math, row.bids.map(function (o: any) {
-                                                                                return o.amount;
-                                                                            })
-                                                                        )
-                                                                        :
-                                                                        "-"
-                                                                    }
-                                                                </p>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    );
-                                                })}
+                                            <TableRow hover role="checkbox" tabIndex={-1} key={row.code} onClick={() => history.push({
+                                                pathname: `/${row.id}`,
+                                                state: { bidder: row },
+                                            })}>
+                                                <TableCell style={{display: 'flex'}}>
+                                                    <img style={AVATAR_STYLE} src={row.avatarUrl} alt={row.firstname}/>
+                                                    <h4>{row.firstname + " " + row.lastname}</h4>
+                                                </TableCell>
+                                                <TableCell>{row.email}</TableCell>
+                                                <TableCell>{row.phone}</TableCell>
+                                                <TableCell>{row.hasPremium ? "Yes" : "No"}</TableCell>
+                                                <TableCell><p className={!bid ? "" : "low-price"}>
+                                                        {sort ? (row.bids[0] || {}).amount : row.bids.length > 0 ? !bid ? Math.max.apply(
+                                                            Math, row.bids.map(function (o: any) {
+                                                                return o.amount;
+                                                            }))
+                                                            : Math.min.apply(Math, row.bids.map(function (o: any) {
+                                                                return o.amount;
+                                                            }))
+                                                            : "-"
+                                                        }
+                                                    </p>
+                                                </TableCell>
                                             </TableRow>
-                                        );
-                                    })}
+                                        )})}
                                 </TableBody>
                             </Table>
                         </TableContainer>
@@ -184,7 +154,7 @@ export const BiddersList = () => {
                             onChangePage={handleChangePage}
                             onChangeRowsPerPage={handleChangeRowsPerPage}
                         />
-                    </Paper>
+                    </div>
                 </>
             )}
         </>
