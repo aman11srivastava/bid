@@ -7,22 +7,22 @@ import {
     Table, TableBody, TableCell,
     TableContainer,
     TableHead, TablePagination, TableRow,
-    Theme,
+    Theme, Typography,
     useTheme
 } from "@material-ui/core";
 import {columns} from "../utils/constants";
 import {ArrowDownward, ArrowUpward} from "@material-ui/icons";
-import {log} from "util";
-
+import {useHistory} from 'react-router-dom'
 
 export const BiddersList = () => {
-
     const [biddersList, setBiddersList] = useState<any>([])
     const [loading, setLoading] = useState<boolean>(true);
     const [sort, setSort] = useState<boolean>(false);
     const [bid, setBid] = useState<boolean>(false);
     const [page, setPage] = useState<number>(0);
     const [rowsPerPage, setRowsPerPage] = useState<number>(10);
+
+    const history = useHistory();
 
     const useStyles = makeStyles((theme: Theme) => ({
         root: {
@@ -58,13 +58,39 @@ export const BiddersList = () => {
     };
 
 
-    function ascendingOrder() {
+    const ascendingOrder = () => {
+        let n = biddersList
+            .map((r: any) => {
+                const d = r.bids.sort((a: any, b: any) => {
+                    return a.amount - b.amount;
+                });
 
-    }
+                return { ...r, bids: d };
+            })
+            .sort((a: any, b: any) => {
+                return (a.bids[0] || {}).amount - (b.bids[0] || {}).amount;
+            });
+        setBiddersList(n);
+        setSort(true);
 
-    function descendingOrder() {
+    };
 
-    }
+    const descendingOrder = () => {
+        let n = biddersList.map((r: any) => {
+                const d = r.bids.sort((a: any, b: any) => {
+                    return b.amount - a.amount;
+                });
+                return { ...r, bids: d };
+            }).sort((a: any, b: any) => {
+                return (b.bids[0] || {}).amount - (a.bids[0] || {}).amount;
+            });
+        setBiddersList(n);
+    };
+
+    const bidingOriginal = () => {
+        setSort(false);
+        setBid(!bid);
+    };
 
     return (
         <>
@@ -72,7 +98,7 @@ export const BiddersList = () => {
                 <>
                     <Paper className={classes.root}>
                         <TableContainer>
-                            <Table stickyHeader>
+                            <Table>
                                 <TableHead>
                                     <TableRow>
                                         {columns.map((column) => (
@@ -83,13 +109,13 @@ export const BiddersList = () => {
                                                 {column.label}
                                                 {column.id === "Bid" && (
                                                     <>
-                                                                      <span onClick={ascendingOrder}>
-                                                                        {" "}
-                                                                          <ArrowUpward/>
-                                                                      </span>
+                                                        <span onClick={ascendingOrder}>
+                                                            {" "}
+                                                            <ArrowUpward/>
+                                                        </span>
                                                         <span onClick={descendingOrder}>
-                                                                            <ArrowDownward/>
-                                                                      </span>
+                                                            <ArrowDownward/>
+                                                        </span>
                                                     </>
                                                 )}
                                             </TableCell>
@@ -104,7 +130,11 @@ export const BiddersList = () => {
                                                 {columns.map((column) => {
                                                     const value = row[column.id];
                                                     return (
-                                                        <TableRow>
+                                                        <TableRow onClick={() =>
+                                                            history.push({
+                                                                pathname: `/${row.id}`,
+                                                                state: { bidder: row },
+                                                            })}>
                                                             <TableCell className="name-img-section">
                                                                 <img
                                                                     height={90}
@@ -121,22 +151,19 @@ export const BiddersList = () => {
                                                             </TableCell>
                                                             <TableCell className="bid-sec" align={"right"}>
                                                                 <p className={!bid ? "" : "low-price"}>
-                                                                    {sort
-                                                                        ? (row.bids[0] || {}).amount : row.bids.length > 0
-                                                                            ? !bid
-                                                                                ? Math.max.apply(
-                                                                                    Math,
-                                                                                    row.bids.map(function (o: any) {
-                                                                                        return o.amount;
-                                                                                    })
-                                                                                )
-                                                                                : Math.min.apply(
-                                                                                    Math,
-                                                                                    row.bids.map(function (o: any) {
-                                                                                        return o.amount;
-                                                                                    })
-                                                                                )
-                                                                            : "-"}
+                                                                    {sort ? (row.bids[0] || {}).amount : row.bids.length > 0 ? !bid ? Math.max.apply(
+                                                                        Math, row.bids.map(function (o: any) {
+                                                                            return o.amount;
+                                                                        })
+                                                                        )
+                                                                        : Math.min.apply(
+                                                                            Math, row.bids.map(function (o: any) {
+                                                                                return o.amount;
+                                                                            })
+                                                                        )
+                                                                        :
+                                                                        "-"
+                                                                    }
                                                                 </p>
                                                             </TableCell>
                                                         </TableRow>
