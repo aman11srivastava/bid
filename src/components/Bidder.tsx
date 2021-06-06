@@ -10,11 +10,7 @@ export const Bidder = ({location}) => {
     console.log(bidderData)
 
     if (bidderData.length === 0){
-        return (
-            <>
-                No bids
-            </>
-        )
+        return <Typography variant={"h2"}>No Bids</Typography>
     }
     else {
         return (

@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import axios from "axios";
+import axios, {AxiosResponse} from "axios";
 import {
     CircularProgress,
     makeStyles,
@@ -11,6 +11,7 @@ import {
 } from "@material-ui/core";
 import {ArrowDownward, ArrowUpward} from "@material-ui/icons";
 import {useHistory} from 'react-router-dom'
+import {URL} from "../api/api";
 
 export const BiddersList = () => {
     const [biddersList, setBiddersList] = useState<any>([])
@@ -30,8 +31,8 @@ export const BiddersList = () => {
     }));
 
     useEffect(() => {
-        axios.get("https://intense-tor-76305.herokuapp.com/merchants")
-            .then((res: any) => {
+        axios.get(URL)
+            .then((res: AxiosResponse<any>) => {
                 console.log(res.data)
                 setBiddersList(res.data)
             })
@@ -55,15 +56,13 @@ export const BiddersList = () => {
         setPage(0);
     };
 
-
     const ascendingOrder = () => {
-        let n = biddersList
-            .map((r: any) => {
-                const d = r.bids.sort((a: any, b: any) => {
-                    return a.amount - b.amount;
+        let n = biddersList.map((list: any) => {
+                const d = list.bids.sort((max: any, min: any) => {
+                    return max.amount - min.amount;
                 });
 
-                return { ...r, bids: d };
+                return { ...list, bids: d };
             })
             .sort((a: any, b: any) => {
                 return (a.bids[0] || {}).amount - (b.bids[0] || {}).amount;
@@ -130,12 +129,8 @@ export const BiddersList = () => {
                                                 <TableCell>{row.hasPremium ? "Yes" : "No"}</TableCell>
                                                 <TableCell><p className={!bid ? "" : "low-price"}>
                                                         {sort ? (row.bids[0] || {}).amount : row.bids.length > 0 ? !bid ? Math.max.apply(
-                                                            Math, row.bids.map(function (o: any) {
-                                                                return o.amount;
-                                                            }))
-                                                            : Math.min.apply(Math, row.bids.map(function (o: any) {
-                                                                return o.amount;
-                                                            }))
+                                                            Math, row.bids.map((bidValue: any) => bidValue.amount))
+                                                            : Math.min.apply(Math, row.bids.map((bidValue: any) => bidValue.amount))
                                                             : "-"
                                                         }
                                                     </p>
